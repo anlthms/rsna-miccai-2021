@@ -1,0 +1,3 @@
+pydicom
+efficientnet-pytorch
+git+https://github.com/shijianjian/EfficientNet-PyTorch-3D
