@@ -6,6 +6,7 @@ from torch.utils import data as torch_data
 
 from dataset import Dataset
 from model import Model
+from config import Config
 
 # ## Predict function
 
@@ -16,7 +17,11 @@ def predict(input_dir, modelfile, df, mri_type, split, device, num_workers):
     assert os.path.exists(modelfile)
     print("Predict:", modelfile, mri_type, df.shape)
     df.loc[:,"MRI_Type"] = mri_type
+    checkpoint = torch.load(modelfile)
+    conf = Config(checkpoint["hp_dict"])
+
     data_retriever = Dataset(
+        conf,
         input_dir,
         df.index.values,
         mri_type=df["MRI_Type"].values,
@@ -30,11 +35,9 @@ def predict(input_dir, modelfile, df, mri_type, split, device, num_workers):
         num_workers=num_workers,
     )
 
-    model = Model()
-    model.to(device)
-
-    checkpoint = torch.load(modelfile)
+    model = Model(conf)
     model.load_state_dict(checkpoint["model_state_dict"])
+    model.to(device)
     model.eval()
 
     y_pred = []

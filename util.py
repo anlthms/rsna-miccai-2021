@@ -9,8 +9,6 @@ import pandas as pd
 import torch
 from torch.utils import data as torch_data
 
-SIZE = 256
-NUM_IMAGES = 64
 
 def set_seed(seed):
     random.seed(seed)
@@ -24,7 +22,7 @@ def set_seed(seed):
 
 # ## Functions to load images
 
-def load_dicom_image(path, img_size=SIZE):
+def load_dicom_image(path, img_size):
     dicom = pydicom.read_file(path)
     data = dicom.pixel_array
     if np.min(data)==np.max(data):
@@ -39,7 +37,7 @@ def load_dicom_image(path, img_size=SIZE):
     return data
 
 def load_dicom_images_3d(
-        data_directory, scan_id, num_imgs=NUM_IMAGES, img_size=SIZE,
+        data_directory, scan_id, num_imgs, img_size,
         mri_type="FLAIR", split="train"):
 
     files = sorted(glob.glob(f"{data_directory}/{split}/{scan_id}/{mri_type}/*.dcm"))
@@ -48,7 +46,7 @@ def load_dicom_images_3d(
     num_imgs2 = num_imgs//2
     p1 = max(0, middle - num_imgs2)
     p2 = min(len(files), middle + num_imgs2)
-    img3d = np.stack([load_dicom_image(f) for f in files[p1:p2]]).T
+    img3d = np.stack([load_dicom_image(f, img_size) for f in files[p1:p2]]).T
     if img3d.shape[-1] < num_imgs:
         n_zero = np.zeros((img_size, img_size, num_imgs - img3d.shape[-1]))
         img3d = np.concatenate((img3d,  n_zero), axis = -1)

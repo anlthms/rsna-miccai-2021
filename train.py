@@ -33,7 +33,7 @@ from sklearn.metrics import roc_auc_score
 
 from model import Model
 from dataset import Dataset
-from util import set_seed, load_dicom_image, load_dicom_images_3d
+from util import set_seed, load_dicom_images_3d
 from predict import predict
 from config import hp_dict, Config
 
@@ -169,6 +169,7 @@ class Trainer:
                 "n_epoch": n_epoch,
                 "auc": auc,
                 "loss": loss,
+                "hp_dict": conf.get()
             },
             self.lastmodel,
         )
@@ -198,6 +199,7 @@ def train_mri_type(df_train, df_valid, mri_type, args, writer):
     print(df_train.head())
 
     train_data_retriever = Dataset(
+        conf,
         args.input,
         df_train["BraTS21ID"].values,
         df_train["MGMT_value"].values,
@@ -205,6 +207,7 @@ def train_mri_type(df_train, df_valid, mri_type, args, writer):
     )
 
     valid_data_retriever = Dataset(
+        conf,
         args.input,
         df_valid["BraTS21ID"].values,
         df_valid["MGMT_value"].values,
@@ -262,7 +265,7 @@ def main():
     args = parser.parse_args()
 
     mri_types = ['FLAIR','T1w','T1wCE','T2w']
-    print(load_dicom_images_3d(args.input, "00000").shape)
+    print(load_dicom_images_3d(args.input, "00000", conf.num_imgs, conf.img_size).shape)
 
     if args.seed:
         set_seed(args.seed)

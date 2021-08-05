@@ -2,6 +2,9 @@ hp_dict = dict(
     # this can be any network supported by efficientnet-pytorch-3d  
     arch = 'efficientnet-b0', 
 
+    img_size = 256,
+    num_imgs = 64,
+
     # optimizer settings
     use_sgd = False,
     lr = 0.001,
