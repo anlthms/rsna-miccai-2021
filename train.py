@@ -97,7 +97,7 @@ class Trainer:
             if self.best_valid_score > valid_loss:
                 self.save_model(n_epoch, save_path, valid_loss, valid_auc)
                 self.info_message(
-                     "auc improved from {:.4f} to {:.4f}. Saved model to '{}'",
+                     "loss improved from {:.4f} to {:.4f}. Saved model to '{}'",
                     self.best_valid_score, valid_loss, self.lastmodel
                 )
                 self.best_valid_score = valid_loss
@@ -106,7 +106,7 @@ class Trainer:
                 self.n_patience += 1
 
             if self.n_patience >= patience:
-                self.info_message("\nValid auc didn't improve last {} epochs.", patience)
+                self.info_message("\nValid loss didn't improve last {} epochs.", patience)
                 break
 
     def train_epoch(self, train_loader):
