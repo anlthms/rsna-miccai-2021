@@ -27,6 +27,7 @@ import torch
 from torch.utils import data as torch_data
 from torch.nn import functional as torch_functional
 
+from torch.utils.tensorboard import SummaryWriter
 from sklearn import model_selection as sk_model_selection
 from sklearn.metrics import roc_auc_score
 
@@ -34,7 +35,9 @@ from model import Model
 from dataset import Dataset
 from util import set_seed, load_dicom_image, load_dicom_images_3d
 from predict import predict
+from config import hp_dict, Config
 
+conf = Config(hp_dict)
 parser = argparse.ArgumentParser()
 parser.add_argument(
     '-b', '--batch-size', default=4, type=int, help='mini-batch size')
@@ -69,13 +72,16 @@ class Trainer:
         self.n_patience = 0
         self.lastmodel = None
 
-    def fit(self, epochs, train_loader, valid_loader, save_path, patience):
+    def fit(self, epochs, train_loader, valid_loader, save_path, patience, writer):
         for n_epoch in range(1, epochs + 1):
             self.info_message("EPOCH: {}", n_epoch)
 
             train_loss, train_time = self.train_epoch(train_loader)
             valid_loss, valid_auc, valid_time = self.valid_epoch(valid_loader)
 
+            writer.add_scalar(f'{save_path} training loss', train_loss, n_epoch)
+            writer.add_scalar(f'{save_path} validation loss', valid_loss, n_epoch)
+            writer.add_scalar(f'{save_path} validation auc', valid_auc, n_epoch)
             self.info_message(
                 "[Epoch Train: {}] loss: {:.4f}, time: {:.2f} s            ",
                 n_epoch, train_loss, train_time
@@ -172,7 +178,7 @@ class Trainer:
         print(message.format(*args), end=end)
 
 
-def train_mri_type(df_train, df_valid, mri_type, args):
+def train_mri_type(df_train, df_valid, mri_type, args, writer):
     if mri_type=="all":
         train_list = []
         valid_list = []
@@ -219,7 +225,7 @@ def train_mri_type(df_train, df_valid, mri_type, args):
         num_workers=args.num_workers,
     )
 
-    model = Model()
+    model = Model(conf)
     model.to(device)
 
     #checkpoint = torch.load("best-model-all-auc0.555.pth")
@@ -227,7 +233,10 @@ def train_mri_type(df_train, df_valid, mri_type, args):
 
     #print(model)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    if conf.use_sgd:
+        optimizer = torch.optim.SGD(model.parameters(), lr=conf.lr, momentum=conf.momentum)
+    else:
+        optimizer = torch.optim.Adam(model.parameters(), lr=conf.lr)
 
     criterion = torch_functional.binary_cross_entropy_with_logits
 
@@ -244,6 +253,7 @@ def train_mri_type(df_train, df_valid, mri_type, args):
         valid_loader,
         f"{mri_type}",
         10,
+        writer
     )
 
     return trainer.lastmodel
@@ -272,8 +282,10 @@ def main():
     df_valid = df_valid.copy()
     df_train.tail()
 
-    modelfiles = [train_mri_type(df_train, df_valid, m, args) for m in mri_types]
+    writer = SummaryWriter()
+    modelfiles = [train_mri_type(df_train, df_valid, m, args, writer) for m in mri_types]
     print(modelfiles)
+    writer.close()
 
     # ## Ensemble for validation
 
