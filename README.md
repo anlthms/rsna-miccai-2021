@@ -4,7 +4,7 @@ This repo contains code to train models for the [RSNA-MICCAI challenge](https://
 
 # Acknowledgement
 
-The code is adapted almost verbatim from a [notebook](https://www.kaggle.com/rluethy/efficientnet3d-with-one-mri-type) by [Roland Luethy](https://www.kaggle.com/rluethy).
+The code is adapted almost verbatim from a [notebook](https://www.kaggle.com/rluethy/efficientnet3d-with-one-mri-type) by [Roland Luethy](https://www.kaggle.com/rluethy), which is in turn based on notebooks by [Yaroslav Isaienkov](https://www.kaggle.com/ihelon/brain-tumor-eda-with-animations-and-modeling) and [Zabir Al Nazi Nabil](https://www.kaggle.com/furcifer/torch-efficientnet3d-for-mri-no-train)
 
 # Usage
 
