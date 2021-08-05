@@ -5,7 +5,7 @@ then
     exit
 fi
 cd ../miccai
-for file in dataset.py util.py model.py predict.py README.md
+for file in dataset.py util.py model.py predict.py config.py README.md
 do
     cp ../code/$file .
 done
