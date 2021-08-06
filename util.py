@@ -40,7 +40,9 @@ def load_dicom_images_3d(
         data_directory, scan_id, num_imgs, img_size,
         mri_type="FLAIR", split="train"):
 
-    files = sorted(glob.glob(f"{data_directory}/{split}/{scan_id}/{mri_type}/*.dcm"))
+    files = sorted(
+        glob.glob(f"{data_directory}/{split}/{scan_id}/{mri_type}/*.dcm"),
+        key=lambda x: int(x.split('-')[-1].split('.')[0]))
 
     middle = len(files)//2
     num_imgs2 = num_imgs//2
